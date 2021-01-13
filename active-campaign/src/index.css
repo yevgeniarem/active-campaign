@@ -37,6 +37,26 @@ code {
   letter-spacing: normal;
 }
 
+.table__header--contact {
+  width: 197px;
+}
+
+.table__header--value {
+  width: 96px;
+}
+
+.table__header--location {
+  width: 161px;
+}
+
+.table__header--deals {
+  width: 105px;
+}
+
+.table__header--tags {
+  width: 359px;
+}
+
 .table__row {
   width: 917px;
   height: 46px;
@@ -51,6 +71,8 @@ code {
   border-radius: 2px;
   border: 1px solid #ced3e0;
   background-color: #ffffff;
+  margin: 0 12px;
+  vertical-align: middle;
 }
 
 styling {
