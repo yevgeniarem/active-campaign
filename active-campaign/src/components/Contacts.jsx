@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import classNames from "classnames";
 import axios from "axios";
 
 import data from "../data-full.json";
@@ -8,6 +9,7 @@ export default function Contacts() {
   const [contactData, setContactData] = useState({
     contacts: [],
   });
+  const [selectedContacts, setSelectedContacts] = useState([]);
 
   // useEffect(() => {
   //   const getContactData = async () => {
@@ -41,6 +43,12 @@ export default function Contacts() {
   const geoAddressObj = convertArrayToObject(contactData.geoAddresses, "id");
   const geoIpsObj = convertArrayToObject(contactData.geoIps, "id");
 
+  const handleClick = (contact) => {
+    setSelectedContacts(...contact);
+  };
+
+  console.log(selectedContacts);
+
   return (
     <>
       <table className="table">
@@ -49,7 +57,7 @@ export default function Contacts() {
             <th className="table__header--contact">
               <input type="checkbox" className="checkbox" /> Contact
             </th>
-            <th className="table__header--value">Value</th>
+            <th className="table__header--value">Total Value</th>
             <th className="table__header--location">Location</th>
             <th className="table__header--deals">Deals</th>
             <th className="table__header--tags">Tags</th>
@@ -85,14 +93,20 @@ export default function Contacts() {
           return (
             <tbody key={id}>
               <tr className="table__row">
-                <td>
-                  <input type="checkbox" className="checkbox" />
+                <td className="table__column--contact">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    onClick={() => handleClick(id)}
+                  />
                   {firstName} {lastName}
                 </td>
-                <td>{`$${totalValue.toLocaleString("en")}`}</td>
-                <td>{getLocation()}</td>
-                <td>{deals.length}</td>
-                <td>{getContactTags()}</td>
+                <td className="table__column--value">{`$${totalValue.toLocaleString(
+                  "en"
+                )}`}</td>
+                <td className="table__column--location">{getLocation()}</td>
+                <td className="table__column--deals">{deals.length}</td>
+                <td className="table__column--tags">{getContactTags()}</td>
               </tr>
             </tbody>
           );
