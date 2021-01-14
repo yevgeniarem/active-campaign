@@ -3,7 +3,13 @@ import classNames from "classnames";
 import axios from "axios";
 
 import data from "../data.json";
-import { convertArrayToObject } from "../helpers.js";
+import {
+  convertArrayToObject,
+  getTotalValue,
+  getLocation,
+  getContactTags,
+} from "../utils/helpers.js";
+import CONST, { formatStrToCurrency } from "../utils/constants.js";
 
 export default function Contacts() {
   const [contactData, setContactData] = useState({
@@ -11,16 +17,23 @@ export default function Contacts() {
   });
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
+  const {
+    contactTags,
+    tags,
+    deals,
+    geoAddresses,
+    geoIps,
+    contacts,
+  } = contactData;
 
   // useEffect(() => {
   //   const getContactData = async () => {
   //     try {
   //       const response = await axios.get(
-  //         "https://cors-anywhere.herokuapp.com/sahmed93846.api-us1.com/api/3/contacts?status=-1&orders%5Bemail%5D=ASC&include=contactTags,deals,contactTags.tag,geoIps.geoAddress,:443",
+  //         `https://${CONST.CORS_ANYWHERE}/${CONST.API}/api/3/contacts?status=-1&orders%5Bemail%5D=ASC&include=contactTags,deals,contactTags.tag,geoIps.geoAddress,:443`,
   //         {
   //           headers: {
-  //             "Api-Token":
-  //               "bcd062dedabcd0f1ac8a568cdcf58660c44d7e79b91763cc1a5d0c03d52c522d851fceb0",
+  //             "Api-Token": CONST.API_TOKEN,
   //           },
   //         }
   //       );
@@ -36,11 +49,12 @@ export default function Contacts() {
     setContactData(data);
   }, []);
 
-  const contactTagsObj = convertArrayToObject(contactData.contactTags, "id");
-  const tagsObj = convertArrayToObject(contactData.tags, "id");
-  const dealsObj = convertArrayToObject(contactData.deals, "id");
-  const geoAddressObj = convertArrayToObject(contactData.geoAddresses, "id");
-  const geoIpsObj = convertArrayToObject(contactData.geoIps, "id");
+  // I would put this into redux/react context
+  const contactTagsObj = convertArrayToObject(contactTags);
+  const tagsObj = convertArrayToObject(tags);
+  const dealsObj = convertArrayToObject(deals);
+  const geoAddressObj = convertArrayToObject(geoAddresses);
+  const geoIpsObj = convertArrayToObject(geoIps);
 
   const handleChange = (id) => {
     if (id === "all") {
@@ -48,7 +62,7 @@ export default function Contacts() {
       if (isAllChecked) {
         setSelectedContacts([]);
       } else {
-        setSelectedContacts(contactData.contacts.map((contact) => contact.id));
+        setSelectedContacts(contacts.map((contact) => contact.id));
       }
     } else if (selectedContacts.includes(id)) {
       const newSelectedContacts = [...selectedContacts];
@@ -60,59 +74,29 @@ export default function Contacts() {
   };
 
   return (
-    <>
-      <table className="table">
-        <thead>
-          <tr className="table__header">
-            <th className="table__header--contact">
-              <input
-                type="checkbox"
-                className={classNames(
-                  isAllChecked ? "checkbox--checked" : "checkbox"
-                )}
-                onChange={() => handleChange("all")}
-                checked={isAllChecked}
-              />{" "}
-              Contact
-            </th>
-            <th className="table__header--value">Total Value</th>
-            <th className="table__header--location">Location</th>
-            <th className="table__header--deals">Deals</th>
-            <th className="table__header--tags">Tags</th>
-          </tr>
-        </thead>
-        {contactData.contacts.map((contact) => {
-          const {
-            id,
-            firstName,
-            lastName,
-            deals,
-            contactTags,
-            geoIps,
-          } = contact;
-          const totalValue =
-            deals.reduce((total, curr) => {
-              return total + parseInt(dealsObj[curr].value);
-            }, 0) / 100;
-          const getLocation = () => {
-            if (geoIpsObj[geoIps]) {
-              const { city, state, country2 } = geoAddressObj[
-                geoIpsObj[geoIps].geoaddrid
-              ];
-              return `${city}, ${state}, ${country2}`;
-            }
-            return "N/A";
-          };
-          const getContactTags = () => {
-            return contactTags
-              .map((contactTag) => tagsObj[contactTagsObj[contactTag].tag].tag)
-              .join(", ");
-          };
+    <table className="table">
+      <thead>
+        <tr className="table__header">
+          <th className="table__header--contact">
+            <input
+              type="checkbox"
+              className={classNames(
+                isAllChecked ? "checkbox--checked" : "checkbox"
+              )}
+              onChange={() => handleChange("all")}
+              checked={isAllChecked}
+            />{" "}
+            Contact
+          </th>
+          <th className="table__header--value">Total Value</th>
+          <th className="table__header--location">Location</th>
+          <th className="table__header--deals">Deals</th>
+          <th className="table__header--tags">Tags</th>
+        </tr>
+      </thead>
+      {contacts.map(
+        ({ id, firstName, lastName, deals, contactTags, geoIps }) => {
           const isChecked = selectedContacts.includes(id);
-          const formatStrToCurrency = new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          });
           return (
             <tbody key={id}>
               <tr
@@ -126,23 +110,28 @@ export default function Contacts() {
                     type="checkbox"
                     checked={isChecked}
                     className={classNames(
-                      isChecked ? "checkbox--checked" : "checkbox"
+                      "checkbox",
+                      isChecked && "checkbox--checked"
                     )}
                     onChange={() => handleChange(id)}
                   />
                   {firstName} {lastName}
                 </td>
                 <td className="table__column--value">
-                  {formatStrToCurrency.format(totalValue)}
+                  {formatStrToCurrency.format(getTotalValue(deals, dealsObj))}
                 </td>
-                <td className="table__column--location">{getLocation()}</td>
+                <td className="table__column--location">
+                  {getLocation(geoIps, geoIpsObj, geoAddressObj)}
+                </td>
                 <td className="table__column--deals">{deals.length}</td>
-                <td className="table__column--tags">{getContactTags()}</td>
+                <td className="table__column--tags">
+                  {getContactTags(contactTags, tagsObj, contactTagsObj)}
+                </td>
               </tr>
             </tbody>
           );
-        })}
-      </table>
-    </>
+        }
+      )}
+    </table>
   );
 }

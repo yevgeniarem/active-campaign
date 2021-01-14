@@ -79,13 +79,6 @@ body {
   outline: none;
 
   &--checked {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
     appearance: auto;
-    background-color: #ffffff;
-    margin: 0 12px;
-    vertical-align: middle;
-    margin-bottom: 2.5px;
   }
 }
