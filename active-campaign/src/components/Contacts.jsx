@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import classNames from "classnames";
 import axios from "axios";
 
-import data from "../data-full.json";
+import data from "../data.json";
 import { convertArrayToObject } from "../helpers.js";
 
 export default function Contacts() {
@@ -10,6 +10,7 @@ export default function Contacts() {
     contacts: [],
   });
   const [selectedContacts, setSelectedContacts] = useState([]);
+  const [isAllChecked, setIsAllChecked] = useState(false);
 
   // useEffect(() => {
   //   const getContactData = async () => {
@@ -35,19 +36,28 @@ export default function Contacts() {
     setContactData(data);
   }, []);
 
-  console.log("CONTACT DATA", contactData);
-
   const contactTagsObj = convertArrayToObject(contactData.contactTags, "id");
   const tagsObj = convertArrayToObject(contactData.tags, "id");
   const dealsObj = convertArrayToObject(contactData.deals, "id");
   const geoAddressObj = convertArrayToObject(contactData.geoAddresses, "id");
   const geoIpsObj = convertArrayToObject(contactData.geoIps, "id");
 
-  const handleClick = (contact) => {
-    setSelectedContacts(...contact);
+  const handleChange = (id) => {
+    if (id === "all") {
+      setIsAllChecked(!isAllChecked);
+      if (isAllChecked) {
+        setSelectedContacts([]);
+      } else {
+        setSelectedContacts(contactData.contacts.map((contact) => contact.id));
+      }
+    } else if (selectedContacts.includes(id)) {
+      const newSelectedContacts = [...selectedContacts];
+      newSelectedContacts.splice(selectedContacts.indexOf(id), 1);
+      setSelectedContacts(newSelectedContacts);
+    } else {
+      setSelectedContacts([...selectedContacts, id]);
+    }
   };
-
-  console.log(selectedContacts);
 
   return (
     <>
@@ -55,7 +65,15 @@ export default function Contacts() {
         <thead>
           <tr className="table__header">
             <th className="table__header--contact">
-              <input type="checkbox" className="checkbox" /> Contact
+              <input
+                type="checkbox"
+                className={classNames(
+                  isAllChecked ? "checkbox--checked" : "checkbox"
+                )}
+                onChange={() => handleChange("all")}
+                checked={isAllChecked}
+              />{" "}
+              Contact
             </th>
             <th className="table__header--value">Total Value</th>
             <th className="table__header--location">Location</th>
@@ -90,20 +108,33 @@ export default function Contacts() {
               .map((contactTag) => tagsObj[contactTagsObj[contactTag].tag].tag)
               .join(", ");
           };
+          const isChecked = selectedContacts.includes(id);
+          const formatStrToCurrency = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          });
           return (
             <tbody key={id}>
-              <tr className="table__row">
+              <tr
+                className={classNames(
+                  "table__row",
+                  isChecked && "table__row--isChecked"
+                )}
+              >
                 <td className="table__column--contact">
                   <input
                     type="checkbox"
-                    className="checkbox"
-                    onClick={() => handleClick(id)}
+                    checked={isChecked}
+                    className={classNames(
+                      isChecked ? "checkbox--checked" : "checkbox"
+                    )}
+                    onChange={() => handleChange(id)}
                   />
                   {firstName} {lastName}
                 </td>
-                <td className="table__column--value">{`$${totalValue.toLocaleString(
-                  "en"
-                )}`}</td>
+                <td className="table__column--value">
+                  {formatStrToCurrency.format(totalValue)}
+                </td>
                 <td className="table__column--location">{getLocation()}</td>
                 <td className="table__column--deals">{deals.length}</td>
                 <td className="table__column--tags">{getContactTags()}</td>
