@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import classNames from "classnames";
 
-import { formatStringToKebabCase } from "../utils/helpers";
+import { formatStringToKebabCase, isTableLoading } from "../utils/helpers";
 
 export default function Table({ data }) {
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -9,9 +9,7 @@ export default function Table({ data }) {
 
   const handleCheck = (id) => {
     if (selectedRows.includes(id)) {
-      const newSelectedRows = [...selectedRows];
-      newSelectedRows.splice(selectedRows.indexOf(id), 1);
-      setSelectedRows(newSelectedRows);
+      setSelectedRows(selectedRows.filter((row) => row !== id));
     } else {
       setSelectedRows([...selectedRows, id]);
     }
@@ -26,7 +24,9 @@ export default function Table({ data }) {
     }
   };
 
-  return (
+  return isTableLoading(data) ? (
+    <div>Loading...</div>
+  ) : (
     <table className="table">
       <thead>
         <tr className="table__header">
@@ -42,7 +42,7 @@ export default function Table({ data }) {
             />
           </th>
           {data.header.map((header) => (
-            <th className={`table__header--${header}`} key={header}>
+            <th className={classNames(`table__header--${header}`)} key={header}>
               {header}
             </th>
           ))}
@@ -64,18 +64,18 @@ export default function Table({ data }) {
                   checked={isChecked}
                 />
               </td>
-              {row.data.map((d, idx) => {
-                return (
-                  <td
-                    className={`table__column--${formatStringToKebabCase(
+              {row.data.map((cell, idx) => (
+                <td
+                  className={classNames(
+                    `table__column--${formatStringToKebabCase(
                       data.header[idx]
-                    )}`}
-                    key={idx}
-                  >
-                    {d}
-                  </td>
-                );
-              })}
+                    )}`
+                  )}
+                  key={idx}
+                >
+                  {cell}
+                </td>
+              ))}
             </tr>
           );
         })}
