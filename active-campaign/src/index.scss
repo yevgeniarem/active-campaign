@@ -25,16 +25,20 @@ body {
     line-height: 1.33;
     letter-spacing: normal;
 
-    &--contact {
-      width: 24%;
+    &--checkbox {
+      width: 3%;
     }
 
-    &--value {
-      width: 14%;
+    &--contact {
+      width: 23%;
+    }
+
+    &--total-value {
+      width: 13%;
     }
 
     &--location {
-      width: 19%;
+      width: 18%;
     }
 
     &--deals {
