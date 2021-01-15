@@ -5,22 +5,24 @@ import { formatStringToKebabCase } from "../utils/helpers";
 
 export default function Table({ data }) {
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  const handleChange = (id) => {
-    if (id === "all") {
-      setIsAllChecked(!isAllChecked);
-      if (isAllChecked) {
-        setSelectedContacts([]);
-      } else {
-        setSelectedContacts(data.rows.map((contact) => contact.id));
-      }
-    } else if (selectedContacts.includes(id)) {
-      const newSelectedContacts = [...selectedContacts];
-      newSelectedContacts.splice(selectedContacts.indexOf(id), 1);
-      setSelectedContacts(newSelectedContacts);
+  const handleCheck = (id) => {
+    if (selectedRows.includes(id)) {
+      const newSelectedRows = [...selectedRows];
+      newSelectedRows.splice(selectedRows.indexOf(id), 1);
+      setSelectedRows(newSelectedRows);
     } else {
-      setSelectedContacts([...selectedContacts, id]);
+      setSelectedRows([...selectedRows, id]);
+    }
+  };
+
+  const handleAllCheck = () => {
+    setIsAllChecked(!isAllChecked);
+    if (isAllChecked) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(data.rows.map((row) => row.id));
     }
   };
 
@@ -35,7 +37,7 @@ export default function Table({ data }) {
                 "checkbox",
                 isAllChecked && "checkbox--checked"
               )}
-              onChange={() => handleChange("all")}
+              onChange={handleAllCheck}
               checked={isAllChecked}
             />
           </th>
@@ -47,10 +49,10 @@ export default function Table({ data }) {
         </tr>
       </thead>
       <tbody>
-        {data.rows.map((contact) => {
-          const isChecked = selectedContacts.includes(contact.id);
+        {data.rows.map((row) => {
+          const isChecked = selectedRows.includes(row.id);
           return (
-            <tr className="table__row" key={contact.id}>
+            <tr className="table__row" key={row.id}>
               <td className="table__column--checkbox">
                 <input
                   type="checkbox"
@@ -58,11 +60,11 @@ export default function Table({ data }) {
                     "checkbox",
                     isChecked && "checkbox--checked"
                   )}
-                  onChange={() => handleChange(contact.id)}
+                  onChange={() => handleCheck(row.id)}
                   checked={isChecked}
                 />
               </td>
-              {contact.data.map((d, idx) => {
+              {row.data.map((d, idx) => {
                 return (
                   <td
                     className={`table__column--${formatStringToKebabCase(
