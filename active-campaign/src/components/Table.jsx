@@ -40,7 +40,9 @@ export default function Table({ data }) {
             />
           </th>
           {data.header.map((header) => (
-            <th className={`table__header--${header}`}>{header}</th>
+            <th className={`table__header--${header}`} key={header}>
+              {header}
+            </th>
           ))}
         </tr>
       </thead>
@@ -48,7 +50,7 @@ export default function Table({ data }) {
         {data.rows.map((contact) => {
           const isChecked = selectedContacts.includes(contact.id);
           return (
-            <tr className="table__row">
+            <tr className="table__row" key={contact.id}>
               <td className="table__column--checkbox">
                 <input
                   type="checkbox"
@@ -66,6 +68,7 @@ export default function Table({ data }) {
                     className={`table__column--${formatStringToKebabCase(
                       data.header[idx]
                     )}`}
+                    key={idx}
                   >
                     {d}
                   </td>
