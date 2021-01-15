@@ -46,7 +46,7 @@ export const formatContactData = ({
     deals,
     geoAddresses,
     geoIps,
-  ].map((a) => convertArrayToObject(a));
+  ].map((arr) => convertArrayToObject(arr));
 
   return {
     header: ["Contact", "Total Value", "Location", "Deals", "Tags"],

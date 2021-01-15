@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import classNames from "classnames";
+import PropTypes from "prop-types";
 
 import { formatStringToKebabCase, isTableLoading } from "../utils/helpers";
 
-export default function Table({ data }) {
+function Table({ data }) {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -69,7 +70,8 @@ export default function Table({ data }) {
                   className={classNames(
                     `table__column--${formatStringToKebabCase(
                       data.header[idx]
-                    )}`
+                    )}`,
+                    isChecked && "table__row--checked"
                   )}
                   key={idx}
                 >
@@ -83,3 +85,16 @@ export default function Table({ data }) {
     </table>
   );
 }
+
+Table.propTypes = {
+  data: PropTypes.shape({
+    header: PropTypes.array,
+    rows: PropTypes.array,
+  }),
+};
+
+Table.defaultProps = {
+  data: { header: null, rows: null },
+};
+
+export default Table;
